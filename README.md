@@ -1,2 +1,2 @@
 # DBClient
-The Java client application to read SQLite database, filter sensor data and forward it to the ConTra server
+The Java client application to read SQLite database, format and filter sensor data and wrap and forward it to the ConTra server

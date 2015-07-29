@@ -12,9 +12,6 @@ import com.aslan.dbclient.model.Location;
 import com.aslan.dbclient.model.SensorData;
 import com.aslan.dbclient.model.SensorResponse;
 import com.aslan.dbclient.model.WiFi;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 public class DBHandler {
 	private List<Location> locationList = new ArrayList<>();
@@ -72,9 +69,9 @@ public class DBHandler {
 	}
 
 	public void processData() {
-		
+
 		SensorResponse response = new SensorResponse();
-		
+
 		for (int i = 0; i < locationList.size() - 1; i++) {
 			SensorData data = new SensorData();
 			data.setType("location");
@@ -90,7 +87,7 @@ public class DBHandler {
 			sendData(response);
 			response = new SensorResponse();
 		}
-		
+
 		List<String> bssids = new ArrayList<>();
 		for (int i = 0; i < wifiList.size() - 1; i++) {
 			bssids.add(wifiList.get(i).getBSSID());
@@ -102,17 +99,16 @@ public class DBHandler {
 			data.setSource("wifi");
 			data.setTime(wifiList.get(i).getTimeStamp().getTime());
 			data.setAccuracy(wifiList.get(i).getLevel());
-			
+
 			String datas[] = new String[bssids.size()];
 			for (int j = 0; j < bssids.size(); j++) {
 				datas[j] = bssids.get(j);
 			}
 			data.setData(datas);
-			System.out.println(data.getData().toString());
-			
+
 			response.addSensorData(data);
 			sendData(response);
-			
+
 			response = new SensorResponse();
 			bssids.clear();
 		}
@@ -122,7 +118,7 @@ public class DBHandler {
 		NetworkHandler networkHandler = new NetworkHandler();
 		response.setUserID("U0001");
 		response.setDeviceID("D0001");
-		
+
 		networkHandler.postRequest(response);
 
 	}

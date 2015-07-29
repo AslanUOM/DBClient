@@ -15,11 +15,11 @@ public class Sensor {
 		roundedTimeStamp.setSeconds(0);
 		roundedTimeStamp.setNanos(0);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		Sensor sensor = (Sensor) obj;
-		if (roundedTimeStamp.equals(sensor.getRoundedTimeStamp())){
+		if (roundedTimeStamp.equals(sensor.getRoundedTimeStamp())) {
 			return true;
 		} else {
 			return false;

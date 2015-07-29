@@ -16,7 +16,7 @@ public class WiFi extends Sensor {
 		this.timeStamp = timeStamp;
 		super.setRoundedTimeStamp(timeStamp);
 	}
-	
+
 	public String getSSID() {
 		return SSID;
 	}

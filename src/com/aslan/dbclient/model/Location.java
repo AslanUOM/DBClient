@@ -52,7 +52,7 @@ public class Location extends Sensor {
 
 	@Override
 	public String toString() {
-		return provider + "\n" + latitude+ ", " + longitude + "\n" + accuracy + "\n" + timeStamp.toString();
+		return provider + "\n" + latitude + ", " + longitude + "\n" + accuracy + "\n" + timeStamp.toString();
 	}
 
 }

@@ -1,13 +1,12 @@
 package com.aslan.dbclient;
 
-import com.aslan.dbclient.model.SensorData;
 import com.aslan.dbclient.model.SensorResponse;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 public class NetworkHandler {
-	
+
 	public void getRequest() {
 		try {
 			Client client = Client.create();

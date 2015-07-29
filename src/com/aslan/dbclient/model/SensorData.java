@@ -1,6 +1,5 @@
 package com.aslan.dbclient.model;
 
-
 import java.io.Serializable;
 import java.util.Arrays;
 

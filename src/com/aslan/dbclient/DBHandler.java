@@ -5,15 +5,23 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.aslan.dbclient.SensorData;
-import com.aslan.dbclient.SensorResponse;
+import com.aslan.dbclient.model.Location;
+import com.aslan.dbclient.model.SensorData;
+import com.aslan.dbclient.model.SensorResponse;
+import com.aslan.dbclient.model.WiFi;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 public class DBHandler {
-	public static void main(String args[]) {
+	private List<Location> locationList = new ArrayList<>();
+	private List<WiFi> wifiList = new ArrayList<>();
+
+	@SuppressWarnings("deprecation")
+	public void readDB() {
 		Connection c = null;
 		Statement stmt = null;
 		try {
@@ -21,107 +29,101 @@ public class DBHandler {
 			c = DriverManager
 					.getConnection("jdbc:sqlite:/Studies/University/FYP/Code/sqlite/vishnu_location_db_dump_full.db");
 			c.setAutoCommit(false);
+
 			System.out.println("Opened database successfully");
 
 			stmt = c.createStatement();
-			
-			//Location table
-			ResultSet rs1 = stmt.executeQuery("SELECT * FROM Locations;");
+
+			// Location table
+			ResultSet rs1 = stmt.executeQuery("SELECT Time,Provider,Latitude,Longitude,Accuracy FROM Locations;");
 			while (rs1.next()) {
-//				int id = rs.getInt("id");
-				Timestamp timestamp = Timestamp.valueOf(rs1.getString("Time"));
-				String provider = rs1.getString("Provider");
-				float latitude = rs1.getFloat("Latitude");
-				float longitude = rs1.getFloat("Longitude");
-				float accuracy = rs1.getFloat("Accuracy");
-				
-				SensorData data = new SensorData();
-				data.setType("location");
-				data.setAccuracy(accuracy);
-				data.setSource(provider);
-				data.setTime(timestamp.getTime());
-				data.setData(new String[] { String.valueOf(latitude), String.valueOf(longitude) });
-				
-				postRequest(data);
-			
-//				System.out.println("Time = " + time);
-//				System.out.println("Provider = " + provider);
-//				System.out.println("Latitude = " + latitude);
-//				System.out.println("Longitude = " + longitude);
-//				System.out.println("Accuracy = " + accuracy);
-//				System.out.println();
+				Location loc = new Location();
+				loc.setTimeStamp(Timestamp.valueOf(rs1.getString("Time")));
+				loc.setProvider(rs1.getString("Provider"));
+				loc.setLatitude(rs1.getString("Latitude"));
+				loc.setLongitude(rs1.getString("Longitude"));
+				loc.setAccuracy(rs1.getDouble("Accuracy"));
+
+				locationList.add(loc);
 			}
 			rs1.close();
-			
-			//WiFi table
-			ResultSet rs2 = stmt.executeQuery("SELECT * FROM WiFi;");
+
+			// WiFi table
+			ResultSet rs2 = stmt.executeQuery("SELECT Time,SSID,BSSID,Level FROM WiFi;");
 			while (rs2.next()) {
-//				int id = rs.getInt("id");
-				Timestamp timestamp = Timestamp.valueOf(rs2.getString("Time"));
-				String SSID = rs2.getString("SSID");
-				String BSSID = rs2.getString("BSSID");
-//				float latitude = rs2.getFloat("Latitude");
-//				float longitude = rs2.getFloat("Longitude");
-//				float accuracy = rs2.getFloat("Accuracy");
-				
-				SensorData data = new SensorData();
-				data.setType("networks");
-				data.setAccuracy(100.00);
-				data.setSource("wifi");
-				data.setTime(timestamp.getTime());
-				data.setData(new String[] { String.valueOf(SSID), String.valueOf(BSSID) });
-				
-				postRequest(data);
+				WiFi wifi = new WiFi();
+				wifi.setTimeStamp(Timestamp.valueOf(rs1.getString("Time")));
+				wifi.setSSID(rs2.getString("SSID"));
+				wifi.setBSSID(rs2.getString("BSSID"));
+				wifi.setLevel(rs2.getInt("Level"));
+
+				wifiList.add(wifi);
 			}
 			rs2.close();
-			
+
 			stmt.close();
 			c.close();
+
 			System.out.println("Operation done successfully");
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
 	}
-	
-	public static void getRequest() {
-		try {
-			Client client = Client.create();
-			WebResource webResource = client.resource("http://localhost:8080/ConTra/sensordatareceiver/save");
-			ClientResponse response = webResource.accept("application/json").get(ClientResponse.class);
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
+
+	public void processData() {
+		
+		SensorResponse response = new SensorResponse();
+		
+		for (int i = 0; i < locationList.size() - 1; i++) {
+			SensorData data = new SensorData();
+			data.setType("location");
+			data.setSource(locationList.get(i).getProvider());
+			data.setTime(locationList.get(i).getTimeStamp().getTime());
+			data.setAccuracy(locationList.get(i).getAccuracy());
+			data.setData(new String[] { locationList.get(i).getLatitude(), locationList.get(i).getLongitude() });
+			response.addSensorData(data);
+
+			if (locationList.get(i).equals(locationList.get(i + 1))) {
+				continue;
 			}
-			String output = response.getEntity(String.class);
-			System.out.println("Output from Server .... \n");
-			System.out.println(output);
-		} catch (Exception e) {
-			e.printStackTrace();
+			sendData(response);
+			response = new SensorResponse();
+		}
+		
+		List<String> bssids = new ArrayList<>();
+		for (int i = 0; i < wifiList.size() - 1; i++) {
+			bssids.add(wifiList.get(i).getBSSID());
+			if (wifiList.get(i).equals(wifiList.get(i + 1))) {
+				continue;
+			}
+			SensorData data = new SensorData();
+			data.setType("networks");
+			data.setSource("wifi");
+			data.setTime(wifiList.get(i).getTimeStamp().getTime());
+			data.setAccuracy(wifiList.get(i).getLevel());
+			
+			String datas[] = new String[bssids.size()];
+			for (int j = 0; j < bssids.size(); j++) {
+				datas[j] = bssids.get(j);
+			}
+			data.setData(datas);
+			System.out.println(data.getData().toString());
+			
+			response.addSensorData(data);
+			sendData(response);
+			
+			response = new SensorResponse();
+			bssids.clear();
 		}
 	}
 
-	public static void postRequest(SensorData data) {
-		SensorResponse sensorResponse = new SensorResponse();
-		sensorResponse.setUserID("U0001");
-		sensorResponse.setDeviceID("D0001");
-		sensorResponse.addSensorData(data);
-
-		try {
-
-			Client client = Client.create();
-			WebResource webResource = client.resource("http://localhost:8080/ConTra/sensordatareceiver/save");
-			String input = "{\"singer\":\"Metallica\",\"title\":\"Fade To Black\"}";
-			ClientResponse response = webResource.type("application/json").post(ClientResponse.class, sensorResponse);
-			if (response.getStatus() != 201) {
-				throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
-			}
-			System.out.println("Output from Server .... \n");
-			String output = response.getEntity(String.class);
-			System.out.println(output);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public void sendData(SensorResponse response) {
+		NetworkHandler networkHandler = new NetworkHandler();
+		response.setUserID("U0001");
+		response.setDeviceID("D0001");
+		
+		networkHandler.postRequest(response);
 
 	}
 }

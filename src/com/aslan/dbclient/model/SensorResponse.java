@@ -1,4 +1,4 @@
-package com.aslan.dbclient;
+package com.aslan.dbclient.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;

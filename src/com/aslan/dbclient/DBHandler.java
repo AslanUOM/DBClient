@@ -104,8 +104,9 @@ public class DBHandler {
 		int countLoc = 0;
 		int countWifi = 0;
 
+		SensorResponse response = new SensorResponse();
+
 		for (; countLoc < locationList.size() - 1; countLoc++) {
-			SensorResponse response = new SensorResponse();
 			SensorData locData = new SensorData();
 			locData.setType("location");
 			locData.setSource(locationList.get(countLoc).getProvider());
@@ -142,6 +143,7 @@ public class DBHandler {
 
 			sendData(response);
 			print(response);
+			response = new SensorResponse();
 		}
 
 		// List<String> bssids = new ArrayList<>();

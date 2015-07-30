@@ -3,6 +3,7 @@ package com.aslan.dbclient.model;
 import java.sql.Timestamp;
 
 public class Sensor implements Comparable<Sensor> {
+	private final int ROUNDING_FACTOR = 2;
 	private Timestamp timeStamp;
 	private Timestamp roundedTimeStamp = new Timestamp(System.currentTimeMillis());
 
@@ -21,10 +22,10 @@ public class Sensor implements Comparable<Sensor> {
 
 	public void setRoundedTimeStamp(Timestamp timeStamp) {
 		roundedTimeStamp.setTime(timeStamp.getTime());
-		if ((timeStamp.getMinutes() % 10) > 5) {
-			roundedTimeStamp.setMinutes((((int)(timeStamp.getMinutes() / 10)) + 1) * 10);
+		if ((timeStamp.getMinutes() % ROUNDING_FACTOR) > (ROUNDING_FACTOR / 2)) {
+			roundedTimeStamp.setMinutes((((int)(timeStamp.getMinutes() / ROUNDING_FACTOR)) + 1) * ROUNDING_FACTOR);
 		} else {
-			roundedTimeStamp.setMinutes(((int)(timeStamp.getMinutes() / 10)) * 10);
+			roundedTimeStamp.setMinutes(((int)(timeStamp.getMinutes() / ROUNDING_FACTOR)) * ROUNDING_FACTOR);
 		}
 		roundedTimeStamp.setSeconds(0);
 		roundedTimeStamp.setNanos(0);

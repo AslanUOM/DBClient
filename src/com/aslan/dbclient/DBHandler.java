@@ -66,9 +66,9 @@ public class DBHandler {
 			}
 			rs1.close();
 			Collections.sort(locationList);
-			for (int k = 0; k < locationList.size(); k++) {
-				System.out.println(locationList.get(k).getRoundedTimeStamp() + ", " + locationList.get(k).getTimeStamp());
-			}
+//			for (int k = 0; k < locationList.size(); k++) {
+//				System.out.println(locationList.get(k).getRoundedTimeStamp() + ", " + locationList.get(k).getTimeStamp());
+//			}
 
 			// WiFi table
 			ResultSet rs2 = stmt.executeQuery("SELECT * FROM " + WIFI_TABLE_NAME
@@ -85,9 +85,9 @@ public class DBHandler {
 			}
 			rs2.close();
 			Collections.sort(wifiList);
-			for (int k = 0; k < wifiList.size(); k++) {
-				System.out.println(wifiList.get(k).getRoundedTimeStamp() + ", " + wifiList.get(k).getTimeStamp());
-			}
+//			for (int k = 0; k < wifiList.size(); k++) {
+//				System.out.println(wifiList.get(k).getRoundedTimeStamp() + ", " + wifiList.get(k).getTimeStamp());
+//			}
 
 			stmt.close();
 			c.close();

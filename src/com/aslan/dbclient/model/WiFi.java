@@ -3,19 +3,9 @@ package com.aslan.dbclient.model;
 import java.sql.Timestamp;
 
 public class WiFi extends Sensor {
-	private Timestamp timeStamp;
 	private String SSID;
 	private String BSSID;
 	private int level;
-
-	public Timestamp getTimeStamp() {
-		return timeStamp;
-	}
-
-	public void setTimeStamp(Timestamp timeStamp) {
-		this.timeStamp = timeStamp;
-		super.setRoundedTimeStamp(timeStamp);
-	}
 
 	public String getSSID() {
 		return SSID;

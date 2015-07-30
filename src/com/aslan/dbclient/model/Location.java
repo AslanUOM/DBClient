@@ -3,20 +3,10 @@ package com.aslan.dbclient.model;
 import java.sql.Timestamp;
 
 public class Location extends Sensor {
-	private Timestamp timeStamp;
 	private String provider;
 	private String latitude;
 	private String longitude;
 	private double accuracy;
-
-	public Timestamp getTimeStamp() {
-		return timeStamp;
-	}
-
-	public void setTimeStamp(Timestamp timeStamp) {
-		this.timeStamp = timeStamp;
-		super.setRoundedTimeStamp(timeStamp);
-	}
 
 	public String getProvider() {
 		return provider;
@@ -52,7 +42,7 @@ public class Location extends Sensor {
 
 	@Override
 	public String toString() {
-		return provider + "\n" + latitude + ", " + longitude + "\n" + accuracy + "\n" + timeStamp.toString();
+		return provider + "\n" + latitude + ", " + longitude + "\n" + accuracy + "\n" + super.getRoundedTimeStamp().toString();
 	}
 
 }

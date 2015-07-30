@@ -16,6 +16,7 @@ import com.aslan.dbclient.model.WiFi;
 public class DBHandler {
 	private List<Location> locationList = new ArrayList<>();
 	private List<WiFi> wifiList = new ArrayList<>();
+	private static final String[] ZERO_LENGTH_ARRAY = new String[0];
 
 	@SuppressWarnings("deprecation")
 	public void readDB() {
@@ -70,48 +71,73 @@ public class DBHandler {
 
 	public void processData() {
 
-		SensorResponse response = new SensorResponse();
+		int countLoc = 0;
+		int countWifi = 0;
 
-		for (int i = 0; i < locationList.size() - 1; i++) {
-			SensorData data = new SensorData();
-			data.setType("location");
-			data.setSource(locationList.get(i).getProvider());
-			data.setTime(locationList.get(i).getTimeStamp().getTime());
-			data.setAccuracy(locationList.get(i).getAccuracy());
-			data.setData(new String[] { locationList.get(i).getLatitude(), locationList.get(i).getLongitude() });
-			response.addSensorData(data);
+		for (; countLoc < locationList.size() - 1; countLoc++) {
+			SensorResponse response = new SensorResponse();
+			SensorData locData = new SensorData();
+			locData.setType("location");
+			locData.setSource(locationList.get(countLoc).getProvider());
+			locData.setTime(locationList.get(countLoc).getTimeStamp().getTime());
+			locData.setAccuracy(locationList.get(countLoc).getAccuracy());
+			locData.setData(new String[] { locationList.get(countLoc).getLatitude(),
+					locationList.get(countLoc).getLongitude() });
+			response.addSensorData(locData);
 
-			if (locationList.get(i).equals(locationList.get(i + 1))) {
+			if (locationList.get(countLoc).equals(locationList.get(countLoc + 1))) {
 				continue;
 			}
+
+			List<String> bssids = new ArrayList<>();
+			for (; countWifi < wifiList.size() - 1; countWifi++) {
+				if (locationList.get(countLoc).getRoundedTimeStamp().getTime() < wifiList.get(countWifi).getRoundedTimeStamp().getTime()) {
+					break;
+				} else if (locationList.get(countLoc).equals(wifiList.get(countWifi))) {
+					bssids.add(wifiList.get(countWifi).getBSSID());
+					if (wifiList.get(countWifi).equals(wifiList.get(countWifi + 1))) {
+						continue;
+					}
+					SensorData wifiData = new SensorData();
+					wifiData.setType("networks");
+					wifiData.setSource("wifi");
+					wifiData.setTime(wifiList.get(countWifi).getTimeStamp().getTime());
+					wifiData.setAccuracy(wifiList.get(countWifi).getLevel());
+					wifiData.setData(bssids.toArray(ZERO_LENGTH_ARRAY));
+
+					response.addSensorData(wifiData);
+					break;
+				}
+			}
+
 			sendData(response);
-			response = new SensorResponse();
+			print(response);
 		}
 
-		List<String> bssids = new ArrayList<>();
-		for (int i = 0; i < wifiList.size() - 1; i++) {
-			bssids.add(wifiList.get(i).getBSSID());
-			if (wifiList.get(i).equals(wifiList.get(i + 1))) {
-				continue;
-			}
-			SensorData data = new SensorData();
-			data.setType("networks");
-			data.setSource("wifi");
-			data.setTime(wifiList.get(i).getTimeStamp().getTime());
-			data.setAccuracy(wifiList.get(i).getLevel());
-
-			String datas[] = new String[bssids.size()];
-			for (int j = 0; j < bssids.size(); j++) {
-				datas[j] = bssids.get(j);
-			}
-			data.setData(datas);
-
-			response.addSensorData(data);
-			sendData(response);
-
-			response = new SensorResponse();
-			bssids.clear();
-		}
+		// List<String> bssids = new ArrayList<>();
+		// for (countWifi = 0; countWifi < wifiList.size() - 1; countWifi++) {
+		// bssids.add(wifiList.get(countWifi).getBSSID());
+		// if (wifiList.get(countWifi).equals(wifiList.get(countWifi + 1))) {
+		// continue;
+		// }
+		// SensorData data = new SensorData();
+		// data.setType("networks");
+		// data.setSource("wifi");
+		// data.setTime(wifiList.get(countWifi).getTimeStamp().getTime());
+		// data.setAccuracy(wifiList.get(countWifi).getLevel());
+		//
+		// String datas[] = new String[bssids.size()];
+		// for (int j = 0; j < bssids.size(); j++) {
+		// datas[j] = bssids.get(j);
+		// }
+		// data.setData(datas);
+		//
+		// response.addSensorData(data);
+		// sendData(response);
+		//
+		// response = new SensorResponse();
+		// bssids.clear();
+		// }
 	}
 
 	public void sendData(SensorResponse response) {
@@ -121,5 +147,13 @@ public class DBHandler {
 
 		networkHandler.postRequest(response);
 
+	}
+	
+	public void print(SensorResponse res) {
+		System.out.println("U_ID: " + res.getUserID());
+		for(SensorData data : res.getSensorDatas()) {
+			System.out.println(data);
+		}
+		System.out.println();
 	}
 }

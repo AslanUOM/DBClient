@@ -11,7 +11,7 @@ public class Sensor {
 
 	public void setRoundedTimeStamp(Timestamp timeStamp) {
 		roundedTimeStamp = timeStamp;
-		roundedTimeStamp.setMinutes(timeStamp.getSeconds() > 30 ? timeStamp.getMinutes() + 1 : timeStamp.getMinutes());
+		roundedTimeStamp.setMinutes(timeStamp.getMinutes() % 10 > 5 ? (timeStamp.getMinutes() / 10) + 10 : timeStamp.getMinutes() / 10);
 		roundedTimeStamp.setSeconds(0);
 		roundedTimeStamp.setNanos(0);
 	}

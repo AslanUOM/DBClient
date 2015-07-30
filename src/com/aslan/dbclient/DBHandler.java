@@ -32,6 +32,31 @@ public class DBHandler {
     public static final String WIFI_COLUMN_LEVEL = "Level";
     public static final String WIFI_COLUMN_FREQUENCY = "Frequency";
     
+    private final String SELECT_LOCATION_TABLE = "SELECT "
+            + LOCATION_COLUMN_TIME
+            + ","
+            + LOCATION_COLUMN_PROVIDER
+            + ","
+            + LOCATION_COLUMN_LATITUDE
+            + ","
+            + LOCATION_COLUMN_LONGITUDE
+            + ","
+            + LOCATION_COLUMN_ACCURACY
+            + " FROM "
+            + LOCATION_TABLE_NAME
+            + ";";
+    private final String SELECT_WIFI_TABLE = "SELECT "
+            + WIFI_COLUMN_TIME
+            + ","
+            + WIFI_COLUMN_SSID
+            + ","
+            + WIFI_COLUMN_BSSID
+            + ","
+            + WIFI_COLUMN_LEVEL
+            + " FROM "
+            + WIFI_TABLE_NAME
+            + ";";
+    
 	private List<Location> locationList = new ArrayList<>();
 	private List<WiFi> wifiList = new ArrayList<>();
 	private static final String[] ZERO_LENGTH_ARRAY = new String[0];
@@ -51,16 +76,14 @@ public class DBHandler {
 			stmt = c.createStatement();
 
 			// Location table
-			ResultSet rs1 = stmt.executeQuery("SELECT *  FROM " + LOCATION_TABLE_NAME
-                + " ORDER BY " + LOCATION_COLUMN_TIME
-                + " ASC;");
+			ResultSet rs1 = stmt.executeQuery(SELECT_LOCATION_TABLE);
 			while (rs1.next()) {
 				Location loc = new Location();
-				loc.setTimeStamp(Timestamp.valueOf(rs1.getString("Time")));
-				loc.setProvider(rs1.getString("Provider"));
-				loc.setLatitude(rs1.getString("Latitude"));
-				loc.setLongitude(rs1.getString("Longitude"));
-				loc.setAccuracy(rs1.getDouble("Accuracy"));
+				loc.setTimeStamp(Timestamp.valueOf(rs1.getString(LOCATION_COLUMN_TIME)));
+				loc.setProvider(rs1.getString(LOCATION_COLUMN_PROVIDER));
+				loc.setLatitude(rs1.getString(LOCATION_COLUMN_LATITUDE));
+				loc.setLongitude(rs1.getString(LOCATION_COLUMN_LONGITUDE));
+				loc.setAccuracy(rs1.getDouble(LOCATION_COLUMN_ACCURACY));
 
 				locationList.add(loc);
 			}
@@ -71,15 +94,13 @@ public class DBHandler {
 //			}
 
 			// WiFi table
-			ResultSet rs2 = stmt.executeQuery("SELECT * FROM " + WIFI_TABLE_NAME
-	                + " ORDER BY " + WIFI_COLUMN_TIME
-	                + " DESC;");
+			ResultSet rs2 = stmt.executeQuery(SELECT_WIFI_TABLE);
 			while (rs2.next()) {
 				WiFi wifi = new WiFi();
-				wifi.setTimeStamp(Timestamp.valueOf(rs1.getString("Time")));
-				wifi.setSSID(rs2.getString("SSID"));
-				wifi.setBSSID(rs2.getString("BSSID"));
-				wifi.setLevel(rs2.getInt("Level"));
+				wifi.setTimeStamp(Timestamp.valueOf(rs1.getString(WIFI_COLUMN_TIME)));
+				wifi.setSSID(rs2.getString(WIFI_COLUMN_SSID));
+				wifi.setBSSID(rs2.getString(WIFI_COLUMN_BSSID));
+				wifi.setLevel(rs2.getInt(WIFI_COLUMN_LEVEL));
 
 				wifiList.add(wifi);
 			}

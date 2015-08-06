@@ -1,6 +1,5 @@
 package com.aslan.dbclient.model;
 
-import java.sql.Timestamp;
 
 public class Location extends Sensor {
 	private String provider;

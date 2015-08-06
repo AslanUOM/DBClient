@@ -199,8 +199,8 @@ public class DBHandler {
 
 	public void sendData(SensorResponse response) {
 		NetworkHandler networkHandler = new NetworkHandler();
-		response.setUserID("U0001");
-		response.setDeviceID("D0001");
+		response.setUserID("55bf9af00ac06ab024f28b3f");
+		response.setDeviceID("55bf75ce5c497920264c64e2");
 
 		networkHandler.postRequest(response);
 
